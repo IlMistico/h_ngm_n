@@ -1,0 +1,9 @@
+# ignore everything
+/*
+*cache*
+#... except what you want to keep
+!**/src
+!**/tests
+!.gitignore
+!logging.conf
+!requirements.txt
