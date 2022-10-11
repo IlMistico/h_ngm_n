@@ -26,16 +26,16 @@ if __name__ == "__main__":
             f"A{'n' if difficulty == 'easy' else ''} {difficulty} game for {username} it is! Here we go!"
         )
         singleplayer_game_manager.start_game(player=username, difficulty=difficulty)
-        status = singleplayer_game_manager.get_status(username=username)
-        print(status)
+        print(singleplayer_game_manager.get_status(username=username))
         while singleplayer_game_manager.get_status(username, guesses_only=True) > 0:
 
             letter_or_word = input(" Guess a letter, or try the full word already: ")
             if len(letter_or_word) == 1:
-                status = singleplayer_game_manager.new_guess(
-                    username=username, letter=letter_or_word
+                print(
+                    singleplayer_game_manager.new_guess(
+                        username=username, letter=letter_or_word
+                    )
                 )
-                print(status)
             else:
                 print(
                     singleplayer_game_manager.submit_result(

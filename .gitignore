@@ -8,3 +8,4 @@
 !logging.conf
 !requirements.txt
 !README.md
+!pytest.ini

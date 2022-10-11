@@ -13,7 +13,7 @@ from src.service.game_manager import SinglePlayerGameManager
 
 singleplayer_game_manager = SinglePlayerGameManager()
 
-singleplayer_game_router = APIRouter(prefix="/hangman/single")
+singleplayer_game_router = APIRouter(prefix="/hangman/rest/single")
 
 
 @singleplayer_game_router.post("/start", response_class=PlainTextResponse)

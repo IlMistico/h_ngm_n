@@ -12,22 +12,26 @@ if str(ROOT := Path(__file__).parent.parent.resolve()) not in sys.path:
     sys.path.append(str(ROOT))
 
 
-from main_webserver import hangman_app
+from src.main import hangman_app
+
+from src.interface.websocket.singleplayer import singleplayer_game_router
+
 
 HOST = os.getenv("HOST", "localhost")
-PORT = os.getenv("PORT", 8090)
-base_url = f"http://{HOST}:{PORT}/hangman"
+PORT = os.getenv("PORT", 8765)
+base_url = f"ws://{HOST}:{PORT}/hangman"
 
 
 client = TestClient(app=hangman_app, base_url=base_url)
 difficulty_map: Dict[str, int] = {"easy": 10, "medium": 7, "hard": 4}
 
-# @pytest.mark.skip
+
+@pytest.mark.skip
 @pytest.mark.parametrize(
     "difficulty",
     list(difficulty_map.keys()),
 )
-def test_singleplayer_game(difficulty, username="Jackster"):
+def test_singleplayer_game_rest(difficulty, username="Jackster"):
 
     base_url_single = base_url + "/single"
 
@@ -102,3 +106,10 @@ def test_singleplayer_game(difficulty, username="Jackster"):
     ]
 
     assert len(set([resp.text for resp in guesses_responses])) <= limit
+
+
+def test_singleplayer_game_websocket(username="Jackster"):
+    # client = TestClient(singleplayer_game_router)
+    with client.websocket_connect("ws/play") as websocket:
+        presentation = websocket.receive_text()
+        websocket.send_text(username)

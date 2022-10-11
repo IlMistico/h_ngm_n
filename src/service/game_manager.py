@@ -12,6 +12,12 @@ def window(arr, window_size):
         yield arr[i : i + window_size]
 
 
+class UniqueUsernameException(Exception):
+    def __init__(self, *args: object) -> None:
+        self.message = "User already exists."
+        super().__init__(*args)
+
+
 class SinglePlayerGameManager:
     def __init__(self) -> None:
         params_db = ParamsDb()
@@ -26,7 +32,8 @@ class SinglePlayerGameManager:
             raise KeyError(f"Difficulty {difficulty} unknown.")
         word = random.choice(self.words)
         game_id = uuid.uuid1()
-
+        if player in self.games.keys():
+            raise
         new_game = Game(
             game_id=game_id,
             word=word,
@@ -53,7 +60,7 @@ class SinglePlayerGameManager:
 
     def new_guess(self, username: str, letter: str) -> str:
         if not (game := self.games.get(username)):
-            raise KeyError(f"Player {username} unknown.")
+            raise KeyError(f"{username} does not have an active game.")
         new_status = "".join(
             [
                 game.word[i] if game.word[i] == letter else c
