@@ -12,7 +12,7 @@ if str(ROOT := Path(__file__).parent.parent.resolve()) not in sys.path:
     sys.path.append(str(ROOT))
 
 
-from src.main import hangman_app
+from main_webserver import hangman_app
 
 HOST = os.getenv("HOST", "localhost")
 PORT = os.getenv("PORT", 8090)
@@ -27,8 +27,8 @@ difficulty_map: Dict[str, int] = {"easy": 10, "medium": 7, "hard": 4}
     "difficulty",
     list(difficulty_map.keys()),
 )
-def test_singleplayer_game(difficulty):
-    username = "Jackster"
+def test_singleplayer_game(difficulty, username="Jackster"):
+
     base_url_single = base_url + "/single"
 
     # Test the single endpoints
@@ -102,31 +102,3 @@ def test_singleplayer_game(difficulty):
     ]
 
     assert len(set([resp.text for resp in guesses_responses])) <= limit
-
-
-@pytest.mark.parametrize(
-    "difficulty",
-    list(difficulty_map.keys()),
-)
-def test_multiplayer_game(difficulty):
-    players = ["Bob", "Bob", "Sarah"]
-    base_url_multi = base_url + "/multi"
-
-    # Test the single endpoints
-    start_response = client.post(
-        base_url_multi + "/start",
-        params={"players": players, "difficulty": difficulty},
-    )
-
-    guess_responses = [
-        client.put(
-            base_url_multi + "/guess",
-            params={"username": username, "letter": "a"},
-        )
-        for username in players
-    ]
-
-    submit_response = client.post(
-        base_url_multi + "/submit",
-        params={"username": players[0], "word": "family"},
-    )

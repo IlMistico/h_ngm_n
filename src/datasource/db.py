@@ -1,8 +1,14 @@
-from typing import Dict
+from typing import Dict, Optional
+import uuid
 from src.models.game import Game
 
 # Mimics an actual database where params are stored.
 class ParamsDb:
+    """
+    Connects the service to a DB used to store parameters
+    Currently mocked.
+    """
+
     def __init__(self) -> None:
         self.words = [
             w.lower()
@@ -34,5 +40,16 @@ class ParamsDb:
 
 
 class GamesDb:
+    """
+    Connects the service to a DB used to store games for further analysis.
+    Currently mocked.
+    """
+
     def __init__(self) -> None:
         self.games: Dict[str, Game] = {}
+
+    def store(username: str, game: Game):
+        pass
+
+    def get(username: str, game_id: Optional[uuid.UUID]):
+        pass

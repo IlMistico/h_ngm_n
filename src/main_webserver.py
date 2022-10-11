@@ -10,20 +10,6 @@ from src.interface.singleplayer_rest import singleplayer_game_router
 hangman_app = FastAPI()
 
 
-# @hangman_app.get("/", response_class=HTMLResponse)
-# def root():
-#     return RedirectResponse("/login", status_code=status.HTTP_302_FOUND)
-
-
-# @hangman_app.get("/login", response_class=HTMLResponse)
-# async def register(request: Request):
-
-#     form_data = await request.form()
-
-#     with open(ROOT.joinpath("src/interface/templates/users/register.html")) as f:
-#         return HTMLResponse(content=f.read())
-
-
 hangman_app.include_router(singleplayer_game_router)
 
 
@@ -31,7 +17,7 @@ if __name__ == "__main__":
     import uvicorn
 
     HOST = os.getenv("HOST", "0.0.0.0")
-    PORT = os.getenv("PORT", 8090)
+    PORT = os.getenv("PORT", 8765)
 
     uvicorn.run(
         "main:hangman_app",
