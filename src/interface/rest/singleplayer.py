@@ -1,14 +1,12 @@
 from fastapi import (
     APIRouter,
+    Depends,
     HTTPException,
     status,
 )
 from fastapi.responses import PlainTextResponse
-import logging
-
-# get logger
-logger = logging.getLogger("hangman")
-
+from src.interface.oauth.auth import get_current_active_user
+from src.models.users import User
 from src.service.game_manager import SinglePlayerGameManager
 
 singleplayer_game_manager = SinglePlayerGameManager()
@@ -17,24 +15,26 @@ singleplayer_game_router = APIRouter(prefix="/hangman/rest/single")
 
 
 @singleplayer_game_router.post("/start", response_class=PlainTextResponse)
-def init_game(username: str, difficulty: str) -> str:
+def init_game(
+    difficulty: str, current_user: User = Depends(get_current_active_user)
+) -> str:
     """
     Initialize a new game for the username passed as argument, with a particular difficulty level.
     The server extracts a new word and returns the current status;
     """
+    username = current_user.username
     singleplayer_game_manager.start_game(player=username, difficulty=difficulty)
     return singleplayer_game_manager.get_status(username=username)
 
 
 @singleplayer_game_router.get("/status", response_class=PlainTextResponse)
-def get_status(
-    username: str,
-    # cookie_or_token: str = Depends(get_cookie_or_token),
-) -> str:
+def get_status(current_user: User = Depends(get_current_active_user)) -> str:
     """
     Returns the current status of the client guessing.
     The current status is represented by the remaining number of guessing and the current status of the guessing;
     """
+    username = current_user.username
+
     try:
         return singleplayer_game_manager.get_status(
             username=username,
@@ -47,15 +47,13 @@ def get_status(
 
 
 @singleplayer_game_router.put("/guess", response_class=PlainTextResponse)
-def new_guess(
-    username: str,
-    letter: str,
-    # cookie_or_token: str = Depends(get_cookie_or_token),
-):
+def new_guess(letter: str, current_user: User = Depends(get_current_active_user)):
     """
     Look for the letter in the word and return the
     result of guessing with the current status;
     """
+    username = current_user.username
+
     if len(letter) != 1:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -71,16 +69,13 @@ def new_guess(
 
 
 @singleplayer_game_router.post("/submit", response_class=PlainTextResponse)
-def submit_result(
-    username: str,
-    word: str,
-    # cookie_or_token: str = Depends(get_cookie_or_token),
-):
+def submit_result(word: str, current_user: User = Depends(get_current_active_user)):
     """
     Try to guess the whole word, it returns a
     string in case of win or lose the game. Only one submit_result
     per game is admitted!
     """
+    username = current_user.username
     try:
         return singleplayer_game_manager.submit_result(username=username, word=word)
     except KeyError as ke:

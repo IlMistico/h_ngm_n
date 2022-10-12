@@ -1,5 +1,6 @@
 from typing import Dict, Optional
 import uuid
+from src.models.users import UserInDB
 from src.models.game import Game
 
 # Mimics an actual database where params are stored.
@@ -80,4 +81,5 @@ class UsersDb:
         }
 
     def get_user(self, username):
-        return self.users.get(username)
+        if user_dict := self.users.get(username):
+            return UserInDB(**user_dict)

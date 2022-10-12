@@ -8,12 +8,14 @@ if str(ROOT := Path(__file__).parent.parent.resolve()) not in sys.path:
 
 from src.interface.rest.singleplayer import singleplayer_game_router as rest_router
 from src.interface.websocket.singleplayer import singleplayer_game_ws as ws_router
+from src.interface.oauth.auth import auth_router
 
 hangman_app = FastAPI()
 
 
 hangman_app.include_router(rest_router)
 hangman_app.include_router(ws_router)
+hangman_app.include_router(auth_router)
 
 
 if __name__ == "__main__":
