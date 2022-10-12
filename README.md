@@ -7,15 +7,23 @@ Write the game engine and a simple `main_cli.py` for a single player to play the
 
 ## Step 1. REST single-player game - COMPLETED
 Expose the game via REST endpoints to support single player games. 
+
 Many player can play indipendently at the same time: each will be handled asynchronously.
-Launch `main_webserver.py` to start the server. Set env variables `HOST` and `PORT` to use custom values.
 
-## Step 2. REST PvP game - TODO
-The same as step 1, but allows two players to compete in the same game. 
+Launch `main_webserver.py` to start the server. If necessary, set env variables `HOST` and `PORT` to use custom values.
 
-## Step 3. Websockets - TODO
+## Step 2. Websockets - COMPLETED
 Use websockets (persistent connection) to handle each game. 
 
-## Step 4. Secure communications - TODO
+## Step 3. Secure communications - TODO
 Add cryptography to both REST and Websocket versions of the game, to encrypt/decrypt messages.
-Easier way would be to create a symmetrical key, exchange it with client on secure channels (via an endpoint over https after authentication) and use it leisurely.
+### Step 3.1 Add SSL certificates - TODO WITH CONDITION
+Real implementation requires real certificates
+
+### 3.2 Add OAuth2 - TODO
+
+## Step 4. PvP game - TODO
+The same as step 1, but allows two players to compete in the same game. 
+
+## Step 5. Cool UI - WILL NOT DO
+Out of scope.

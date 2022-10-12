@@ -14,15 +14,14 @@ if str(ROOT := Path(__file__).parent.parent.resolve()) not in sys.path:
 
 from src.main import hangman_app
 
-from src.interface.websocket.singleplayer import singleplayer_game_router
+from src.interface.websocket.singleplayer import singleplayer_game_ws
 
 
 HOST = os.getenv("HOST", "localhost")
 PORT = os.getenv("PORT", 8765)
-base_url = f"ws://{HOST}:{PORT}/hangman"
+client = TestClient(app=hangman_app)
 
 
-client = TestClient(app=hangman_app, base_url=base_url)
 difficulty_map: Dict[str, int] = {"easy": 10, "medium": 7, "hard": 4}
 
 
@@ -33,33 +32,33 @@ difficulty_map: Dict[str, int] = {"easy": 10, "medium": 7, "hard": 4}
 )
 def test_singleplayer_game_rest(difficulty, username="Jackster"):
 
-    base_url_single = base_url + "/single"
+    url = f"http://{HOST}:{PORT}/hangman/rest/single"
 
     # Test the single endpoints
     start_response = client.post(
-        base_url_single + "/start",
+        url + "/start",
         params={"username": username, "difficulty": difficulty},
     )
 
     status_response = client.get(
-        base_url_single + "/status",
+        url + "/status",
         params={
             "username": username,
         },
     )
 
     guess_response = client.put(
-        base_url_single + "/guess",
+        url + "/guess",
         params={"username": username, "letter": "a"},
     )
 
     invalid_guess_response = client.put(
-        base_url_single + "/guess",
+        url + "/guess",
         params={"username": username, "letter": "argwer"},
     )
 
     submit_response = client.post(
-        base_url_single + "/submit",
+        url + "/submit",
         params={"username": username, "word": "family"},
     )
     # Map each response with the expected status code
@@ -96,7 +95,7 @@ def test_singleplayer_game_rest(difficulty, username="Jackster"):
 
     guesses_responses = [
         client.put(
-            base_url_single + "/guess",
+            url + "/guess",
             params={
                 "username": username,
                 "letter": random.choice(string.ascii_lowercase),
@@ -108,8 +107,18 @@ def test_singleplayer_game_rest(difficulty, username="Jackster"):
     assert len(set([resp.text for resp in guesses_responses])) <= limit
 
 
-def test_singleplayer_game_websocket(username="Jackster"):
-    # client = TestClient(singleplayer_game_router)
-    with client.websocket_connect("ws/play") as websocket:
+@pytest.mark.parametrize(
+    "difficulty",
+    list(difficulty_map.keys()),
+)
+async def test_singleplayer_game_websocket(difficulty, username="Jackster"):
+    url = f"ws://{HOST}:{PORT}/hangman/ws/play"
+    with client.websocket_connect(url) as websocket:
         presentation = websocket.receive_text()
-        websocket.send_text(username)
+        await websocket.send_text(username)
+        difficulty_selection = await websocket.receive_text()
+        await websocket.send_text(difficulty)
+        difficulty_selection = await websocket.receive_text()
+        await websocket.send_text("a")
+        await websocket.send_text("e")
+        await websocket.send_text("tellar")

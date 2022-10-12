@@ -6,7 +6,7 @@ if str(ROOT := Path(__file__).parent.parent.resolve()) not in sys.path:
     sys.path.append(str(ROOT))
 
 from src.interface.rest.singleplayer import singleplayer_game_router as rest_router
-from src.interface.websocket.singleplayer import singleplayer_game_router as ws_router
+from src.interface.websocket.singleplayer import singleplayer_game_ws as ws_router
 
 hangman_app = FastAPI()
 
