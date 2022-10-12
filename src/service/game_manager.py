@@ -33,7 +33,8 @@ class SinglePlayerGameManager:
         word = random.choice(self.words)
         game_id = uuid.uuid1()
         if player in self.games.keys():
-            raise
+            # raise UniqueUsernameException()
+            return False
         new_game = Game(
             game_id=game_id,
             word=word,
@@ -47,14 +48,15 @@ class SinglePlayerGameManager:
 
     def get_status(self, username: str, guesses_only: bool = False) -> str:
         if not (game := self.games.get(username)):
-            raise KeyError(f"Player {username} unknown.")
+            raise KeyError(f"{username} does not have an active game.")
+
         remaining_attemps_message = (
-            f"Only {attempts_remaining} guesses remaining!"
+            f"{attempts_remaining} guess{'' if attempts_remaining == 1 else 'es'} remaining!"
             if (attempts_remaining := game.attempts_remaining) > 0
-            else f"Sorry {username}, you ran out of guesses! Try your luck or start a new game!"
+            else f"Sorry {username}, you have {attempts_remaining} remaining guesses! Try your luck or start a new game!"
         )
         if guesses_only:
-            return attempts_remaining
+            return game.attempts_remaining
         else:
             return f"{' '.join(list(game.status))}.\n" + remaining_attemps_message
 

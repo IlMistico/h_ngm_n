@@ -17,7 +17,7 @@ Use websockets (persistent connection) to handle each game.
 
 ## Step 3. Secure communications - TODO
 Add cryptography to both REST and Websocket versions of the game, to encrypt/decrypt messages.
-### Step 3.1 Add SSL certificates - TODO WITH CONDITION
+### Step 3.1 Add SSL certificates - COMPLETED WITH CONDITION
 Real implementation requires real certificates
 
 ### 3.2 Add OAuth2 - TODO

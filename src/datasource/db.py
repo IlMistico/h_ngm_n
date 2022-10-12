@@ -53,3 +53,31 @@ class GamesDb:
 
     def get(username: str, game_id: Optional[uuid.UUID]):
         pass
+
+
+class UsersDb:
+    """
+    Connects the service to a DB used to store users for oauth.
+    Currently mocked.
+    """
+
+    def __init__(self) -> None:
+        self.users = {
+            "johndoe": {
+                "username": "johndoe",
+                "full_name": "John Doe",
+                "email": "johndoe@example.com",
+                "hashed_password": "fakehashedsecret",
+                "disabled": False,
+            },
+            "alice": {
+                "username": "alice",
+                "full_name": "Alice Wonderson",
+                "email": "alice@example.com",
+                "hashed_password": "fakehashedsecret2",
+                "disabled": True,
+            },
+        }
+
+    def get_user(self, username):
+        return self.users.get(username)

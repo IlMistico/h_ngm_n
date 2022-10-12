@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, WebSocket, WebSocketDisconnect
 from src.interface.websocket.utils import ConnectionManager, get_cookie_or_token
-from src.service.game_manager import SinglePlayerGameManager
+from src.service.game_manager import SinglePlayerGameManager, UniqueUsernameException
 
 singleplayer_game_manager = SinglePlayerGameManager()
 
@@ -11,7 +11,7 @@ difficulty_phrase = "Ok then/ Tell me, {}, how hard do you like to play? Choose 
 wrong_difficulty_phrase = (
     "Let me ask again, {}. Do you want your game easy, medium or hard?"
 )
-guess_message = " Guess a letter, or try the full word already: "
+guess_message = " You have {} tries. Good Luck!"
 
 new_match_question = "Would you care for another round? (y/n)"
 new_match_message = "Alright then, here we go!"
@@ -33,6 +33,13 @@ async def play_hangman(
                 await connection_manager.send_message(presentation, websocket=websocket)
                 username = await websocket.receive_text()
 
+            while not singleplayer_game_manager.start_game(username, difficulty):
+                await connection_manager.send_message(
+                    f"Sorry, username {username} is already taken, please select another one.",
+                    websocket=websocket,
+                )
+                username = await websocket.receive_text()
+
             await connection_manager.send_message(
                 difficulty_phrase.format(username), websocket=websocket
             )
@@ -42,32 +49,31 @@ async def play_hangman(
                     wrong_difficulty_phrase.format(username), websocket=websocket
                 )
                 difficulty = await websocket.receive_text()
-            singleplayer_game_manager.start_game(username, difficulty)
 
             await connection_manager.send_message(
                 singleplayer_game_manager.get_status(username=username),
                 websocket=websocket,
             )
+            guesses_remaining = singleplayer_game_manager.get_status(
+                username, guesses_only=True
+            )
 
-            while (
-                guesses_remaining := singleplayer_game_manager.get_status(
-                    username, guesses_only=True
-                )
-                >= 0
-            ):
+            await connection_manager.send_message(
+                guess_message.format(guesses_remaining),
+                websocket=websocket,
+            )
 
-                await connection_manager.send_message(
-                    guess_message,
-                    websocket=websocket,
-                )
+            while guesses_remaining >= 0:
+
                 letter_or_word = await websocket.receive_text()
-                if len(letter_or_word) == 1:
+                if len(letter_or_word) == 1 and guesses_remaining != 0:
                     await connection_manager.send_message(
                         singleplayer_game_manager.new_guess(
                             username=username, letter=letter_or_word
                         ),
                         websocket=websocket,
                     )
+                    guesses_remaining -= 1
                 else:
                     await connection_manager.send_message(
                         singleplayer_game_manager.submit_result(
