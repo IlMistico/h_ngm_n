@@ -5,7 +5,7 @@ from fastapi import (
     status,
 )
 from fastapi.responses import PlainTextResponse
-from src.interface.oauth.auth import get_current_active_user
+from src.interface.auth.rest import get_current_active_user
 from src.models.users import User
 from src.service.game_manager import SinglePlayerGameManager
 

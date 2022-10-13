@@ -8,7 +8,7 @@ if str(ROOT := Path(__file__).parent.parent.resolve()) not in sys.path:
 
 from src.interface.rest.singleplayer import singleplayer_game_router as rest_router
 from src.interface.websocket.singleplayer import singleplayer_game_ws as ws_router
-from src.interface.oauth.auth import auth_router
+from src.interface.auth.rest import auth_router
 
 hangman_app = FastAPI()
 
@@ -22,7 +22,7 @@ if __name__ == "__main__":
     import uvicorn
 
     HOST = os.getenv("HOST", "0.0.0.0")
-    PORT = os.getenv("HOST", 8765)
+    PORT = os.getenv("PORT", 8765)
 
     if (SSL_KEYFILE := os.getenv("SSL_KEYFILE")) and (
         SSL_CERTFILE := os.getenv("SSL_CERTFILE")
@@ -32,7 +32,7 @@ if __name__ == "__main__":
 
         uvicorn.run(
             "main:hangman_app",
-            host=HOST,
+            host=str(HOST),
             port=443,
             log_level="info",
             ssl_keyfile=SSL_KEYFILE,

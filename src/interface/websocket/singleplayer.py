@@ -1,19 +1,20 @@
-from fastapi import APIRouter, Depends, WebSocket, WebSocketDisconnect
-from src.interface.websocket.utils import ConnectionManager, get_cookie_or_token
-from src.service.game_manager import SinglePlayerGameManager, UniqueUsernameException
+from fastapi import APIRouter, Depends, Query, WebSocket, WebSocketDisconnect
+from fastapi_jwt_auth import AuthJWT
+from src.interface.websocket.utils import ConnectionManager
+from src.service.game_manager import SinglePlayerGameManager
 
 singleplayer_game_manager = SinglePlayerGameManager()
 
 singleplayer_game_ws = APIRouter()
 
 presentation = "Let's start with some introductions. Who are you?"
-difficulty_phrase = "Ok then/ Tell me, {}, how hard do you like to play? Choose between 'easy', 'medium' or 'hard'."
+difficulty_phrase = "Hi {}! Please choose between 'easy', 'medium' or 'hard'."
 wrong_difficulty_phrase = (
     "Let me ask again, {}. Do you want your game easy, medium or hard?"
 )
 guess_message = " You have {} tries. Good Luck!"
 
-new_match_question = "Would you care for another round? (y/n)"
+new_match_question = "{}Would you care for another round? (y/n)"
 new_match_message = "Alright then, here we go!"
 goodbye_message = "Very well {}, it was a pleasure playing with you. Have a good life!"
 
@@ -21,25 +22,14 @@ connection_manager = ConnectionManager()
 
 
 @singleplayer_game_ws.websocket_route("/hangman/ws/play")
-async def play_hangman(
-    websocket: WebSocket,
-    cookie_or_token: str = Depends(get_cookie_or_token),
-):
+async def play_hangman(websocket: WebSocket):
     username = None
     await connection_manager.connect(websocket)
     try:
-        while cookie_or_token:
+        while True:
             if not username:
                 await connection_manager.send_message(presentation, websocket=websocket)
                 username = await websocket.receive_text()
-
-            while not singleplayer_game_manager.start_game(username, difficulty):
-                await connection_manager.send_message(
-                    f"Sorry, username {username} is already taken, please select another one.",
-                    websocket=websocket,
-                )
-                username = await websocket.receive_text()
-
             await connection_manager.send_message(
                 difficulty_phrase.format(username), websocket=websocket
             )
@@ -49,6 +39,7 @@ async def play_hangman(
                     wrong_difficulty_phrase.format(username), websocket=websocket
                 )
                 difficulty = await websocket.receive_text()
+            singleplayer_game_manager.start_game(username, difficulty)
 
             await connection_manager.send_message(
                 singleplayer_game_manager.get_status(username=username),
@@ -85,16 +76,21 @@ async def play_hangman(
                     break
 
             await connection_manager.send_message(
-                new_match_question,
+                new_match_question.format(""),
                 websocket=websocket,
             )
-            new_match = await websocket.receive_text()
-            if new_match.lower() in ["y", "yes", "of course"]:
+
+            while (new_match := await websocket.receive_text()) not in [
+                "y",
+                "n",
+                "Y",
+                "N",
+            ]:
                 await connection_manager.send_message(
-                    new_match_question,
+                    new_match_question.format("Sorry, I'm not sure what you said. "),
                     websocket=websocket,
                 )
-            else:
+            if new_match.lower() == "n":
                 await connection_manager.send_message(
                     goodbye_message.format(username),
                     websocket=websocket,
