@@ -112,19 +112,39 @@ def test_singleplayer_game_rest(difficulty, username="johndoe", password="johndo
     assert len(set([resp.text for resp in guesses_responses])) <= limit
 
 
-@pytest.mark.skip()
+# @pytest.mark.skip
 @pytest.mark.parametrize(
     "difficulty",
     list(difficulty_map.keys()),
 )
-async def test_singleplayer_game_websocket(difficulty, username="Jackster"):
+def test_singleplayer_game_websocket(difficulty, username="Jackster"):
+
+    presentation = "Let's start with some introductions. Who are you?"
+    difficulty_phrase = "Hi {}! Please choose between 'easy', 'medium' or 'hard'."
+
+    goodbye_message = (
+        "Very well {}, it was a pleasure playing with you. Have a good life!"
+    )
+
     url = f"ws://{HOST}:{PORT}/hangman/ws/play"
     with client.websocket_connect(url) as websocket:
-        presentation = websocket.receive_text()
-        await websocket.send_text(username)
-        difficulty_selection = await websocket.receive_text()
-        await websocket.send_text(difficulty)
-        difficulty_selection = await websocket.receive_text()
-        await websocket.send_text("a")
-        await websocket.send_text("e")
-        await websocket.send_text("tellar")
+        presentation_response = websocket.receive_text()
+        websocket.send_text(username)
+        difficulty_selection_response = websocket.receive_text()
+        websocket.send_text(difficulty)
+        websocket.receive_text()
+        status1_response = websocket.receive_text()
+        websocket.send_text("a")
+        status2_response = websocket.receive_text()
+        websocket.send_text("e")
+        status3_response = websocket.receive_text()
+        websocket.send_text("tellar")
+        end_game_response = websocket.receive_text()
+        new_round_response = websocket.receive_text()
+        websocket.send_text("n")
+        goodbye_response = websocket.receive_text()
+
+        assert presentation == presentation_response
+        assert difficulty_phrase.format(username) == difficulty_selection_response
+
+        assert goodbye_message.format(username) == goodbye_response
