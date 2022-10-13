@@ -1,6 +1,6 @@
 # The hangman game server
 
-This is an implementation of the hangman game in Python.
+This is an implementation of the hangman game in Python. It contains a lot of useful concepts to use FastAPI (endpoints, OAuth2, websockets...)
 
 ## Step 0: CLI game - COMPLETED
 Write the game engine and a simple `main_cli.py` for a single player to play the game from command line.
@@ -10,7 +10,7 @@ Expose the game via REST endpoints to support single player games.
 
 Many player can play indipendently at the same time: each will be handled asynchronously.
 
-Launch `main_webserver.py` to start the server. If necessary, set env variables `HOST` and `PORT` to use custom values.
+Launch `src/main_cli.py` to start the server. If necessary, set env variables `HOST` and `PORT` to use custom values.
 
 ## Step 2. Websockets - COMPLETED
 Use websockets (persistent connection) to handle each game. 
@@ -21,7 +21,7 @@ Add cryptography to both REST and Websocket versions of the game, to encrypt/dec
 Set the values for the env variables `SSL_KEYFILE = /path/to/privkey.pem` and `SSL_CERTFILE = /path/to/fullchain.pem`. Requires to setup domain and certificates.
 
 ### 3.2 (EXTRA) Add authentication - COMPLETED (partially, naive)
-Allow a couple of predetermined users to login with their password
+Allow a couple of predetermined users and use OAuth2 to login and play
 
 To keep things simple, this service stores the users db and provides the token. A real OAuth2 flow would have separate entities for that.
 
