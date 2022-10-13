@@ -2,6 +2,27 @@
 
 This is an implementation of the hangman game in Python. It contains a lot of useful concepts to use FastAPI (endpoints, OAuth2, websockets...)
 
+# Instructions to play
+## Launch the server
+The easiest way is to use docker: build the image with the provided Dockerfile and launch a container. By default the server listens on port 8765, edit the PORT env variable in the Dockerfile to change it.
+In alternative, install `requirements.txt` in a virtual environment, activate it and launch `python src/main.py`. Again, default port is 8765.
+## Play
+There are two ways to play: 
+### REST with Oauth2: 
+- POST to http://www.HOST:PORT/login with form = {"grant_type": "password", "username": "johndoe", "password": johndoe"}, you will receive a (fake) token ("johndoe"). You can skip this step as the token is fake and always the same. 
+Now add the following header to further requests: {"Authorization": "Bearer johndoe"}
+- POST to http://www.HOST:PORT/hangman/rest/single/start?difficulty=choose between easy, medium and hard
+- PUT to http://www.HOST:PORT/hangman/rest/single/guess?letter=choose letter
+- keep doing PUT requests to http://www.HOST:PORT/hangman/rest/single/guess?letter=choose letter. Keep in mind, if you run out of guesses, further requests will be accepted but will not add further letters, even if you are correct.
+- POST to http://www.HOST:PORT/hangman/rest/single/submit?word=choose word. You will receive a message to tell you if you won or not, then the game will end.
+### Websocket unauthenticated:
+- connect to the websocket on the url ws://HOST:PORT/hangman/ws/play
+- follow the messages. You will be requested to insert a username and a difficulty level. 
+- keep guessing. If you run out of guesses, your next guess will be treated as a solution attempt, even if it's only 1 letter long!
+- when the game ends, you will be asked if you want to play again with the same username or close the game (and the connection).
+
+# Dev diary
+
 ## Step 0: CLI game - COMPLETED
 Write the game engine and a simple `main_cli.py` for a single player to play the game from command line.
 
