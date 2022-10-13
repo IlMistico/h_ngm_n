@@ -1,0 +1,14 @@
+*
+
+!src/
+!requirements.txt
+!logging.conf
+
+# venv_*
+# **/*cache*
+# .vscode
+# tests
+# work*
+# **/*manual*
+# pytest.ini
+# README.md

@@ -15,15 +15,26 @@ Launch `main_webserver.py` to start the server. If necessary, set env variables 
 ## Step 2. Websockets - COMPLETED
 Use websockets (persistent connection) to handle each game. 
 
-## Step 3. Secure communications - TODO
+## Step 3. Secure communications - COMPLETED 
 Add cryptography to both REST and Websocket versions of the game, to encrypt/decrypt messages.
-### Step 3.1 Add SSL certificates - COMPLETED WITH CONDITION
-Real implementation requires real certificates
+### Step 3.1 Add SSL certificates - COMPLETED
+Set the values for the env variables `SSL_KEYFILE = /path/to/privkey.pem` and `SSL_CERTFILE = /path/to/fullchain.pem`. Requires to setup domain and certificates.
 
-### 3.2 Add OAuth2 - TODO
+### 3.2 (EXTRA) Add authentication - COMPLETED (partially, naive)
+Allow a couple of predetermined users to login with their password
+
+To keep things simple, this service stores the users db and provides the token. A real OAuth2 flow would have separate entities for that.
+
+TODO:
+- add a registration UI and flow to add more users
+- add scopes and roles (bit redundant for this game maybe :-D )
+- handle auth flow for Websockets (need more "manual" handling)
 
 ## Step 4. PvP game - TODO
 The same as step 1, but allows two players to compete in the same game. 
 
 ## Step 5. Cool UI - WILL NOT DO
 Out of scope.
+
+## Step 6. (EXTRA) Dockerize
+Added Dockerfile and .dockerignore
