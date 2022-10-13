@@ -20,47 +20,52 @@ from src.interface.websocket.singleplayer import singleplayer_game_ws
 HOST = os.getenv("HOST", "localhost")
 PORT = os.getenv("PORT", 8765)
 client = TestClient(app=hangman_app)
+base_url = f"http://{HOST}:{PORT}"
 
 
 difficulty_map: Dict[str, int] = {"easy": 10, "medium": 7, "hard": 4}
 
 
-@pytest.mark.skip
+# @pytest.mark.skip
 @pytest.mark.parametrize(
     "difficulty",
     list(difficulty_map.keys()),
 )
-def test_singleplayer_game_rest(difficulty, username="Jackster"):
+def test_singleplayer_game_rest(difficulty, username="johndoe", password="johndoe"):
 
-    url = f"http://{HOST}:{PORT}/hangman/rest/single"
+    url = base_url + "/hangman/rest/single"
+
+    token_request = client.post(
+        base_url + "/login",
+        data={"grant_type": "password", "username": username, "password": password},
+    )
+
+    assert token_request.status_code == 200
+    token = token_request.json().get("access_token")
+    assert bool(token)
+    assert token == "johndoe"
+
+    auth_header = {"Authorization": f"Bearer {token}"}
 
     # Test the single endpoints
     start_response = client.post(
-        url + "/start",
-        params={"username": username, "difficulty": difficulty},
+        url + "/start", params={"difficulty": difficulty}, headers=auth_header
     )
 
-    status_response = client.get(
-        url + "/status",
-        params={
-            "username": username,
-        },
-    )
+    status_response = client.get(url + "/status", headers=auth_header)
 
     guess_response = client.put(
-        url + "/guess",
-        params={"username": username, "letter": "a"},
+        url + "/guess", params={"letter": "a"}, headers=auth_header
     )
 
     invalid_guess_response = client.put(
-        url + "/guess",
-        params={"username": username, "letter": "argwer"},
+        url + "/guess", params={"letter": "argwer"}, headers=auth_header
     )
 
     submit_response = client.post(
-        url + "/submit",
-        params={"username": username, "word": "family"},
+        url + "/submit", params={"word": "family"}, headers=auth_header
     )
+
     # Map each response with the expected status code
     expected_codes_map = {
         **dict(
@@ -97,9 +102,9 @@ def test_singleplayer_game_rest(difficulty, username="Jackster"):
         client.put(
             url + "/guess",
             params={
-                "username": username,
                 "letter": random.choice(string.ascii_lowercase),
             },
+            headers=auth_header,
         )
         for _ in range(limit * 2)
     ]
@@ -107,6 +112,7 @@ def test_singleplayer_game_rest(difficulty, username="Jackster"):
     assert len(set([resp.text for resp in guesses_responses])) <= limit
 
 
+@pytest.mark.skip()
 @pytest.mark.parametrize(
     "difficulty",
     list(difficulty_map.keys()),
